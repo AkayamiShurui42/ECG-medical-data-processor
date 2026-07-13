@@ -1,0 +1,6 @@
+{
+  "name": "ECG Analyser",
+  "description": "AI-assisted ECG and loop recorder interpretation tool for waveform analysis, arrhythmia detection, and clinical artifact identification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
