@@ -143,7 +143,7 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<ClinicalLiterature>>(LiteratureRepository.literatureList)
+    private val _searchResults = MutableStateFlow<List<ClinicalLiterature>>(LiteratureRepository.literatureList.sortedByDescending { it.year })
     val searchResults: StateFlow<List<ClinicalLiterature>> = _searchResults.asStateFlow()
 
     private val _apiErrorMessage = MutableStateFlow<String?>(null)
@@ -187,19 +187,19 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = query
         viewModelScope.launch {
             if (query.isEmpty()) {
-                _searchResults.value = LiteratureRepository.literatureList
+                _searchResults.value = LiteratureRepository.literatureList.sortedByDescending { it.year }
             } else {
                 val results = withContext(Dispatchers.IO) {
                     PubMedSearch.searchPubMed(query)
                 }
                 if (results.isNotEmpty()) {
-                    _searchResults.value = results
+                    _searchResults.value = results.sortedByDescending { it.year }
                 } else {
                     _searchResults.value = LiteratureRepository.literatureList.filter {
                         it.title.contains(query, ignoreCase = true) ||
                                 it.summary.contains(query, ignoreCase = true) ||
                                 it.category.contains(query, ignoreCase = true)
-                    }
+                    }.sortedByDescending { it.year }
                 }
             }
         }

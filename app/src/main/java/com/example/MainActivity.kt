@@ -1149,7 +1149,7 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                 color = Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.height(6.dp))
-            interpret.literatureRefs.forEach { lit ->
+            interpret.literatureRefs.sortedByDescending { it.year }.forEach { lit ->
                 LiteratureCitationRow(lit)
             }
         }
