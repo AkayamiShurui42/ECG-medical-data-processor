@@ -53,6 +53,7 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.example.data.AppLogger.init(this)
         enableEdgeToEdge()
         setContent {
             val viewModel: EcgViewModel = viewModel()
@@ -267,6 +268,17 @@ fun AppHeader(
                 color = Color.White.copy(alpha = 0.8f),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Light
+            )
+        }
+
+        val context = LocalContext.current
+        IconButton(
+            onClick = { com.example.data.AppLogger.shareLogs(context) }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.BugReport,
+                contentDescription = "Share Logs & Crash Reports",
+                tint = Color.White
             )
         }
 
