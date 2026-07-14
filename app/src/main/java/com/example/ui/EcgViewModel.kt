@@ -274,6 +274,12 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
                     - Is Patient Moving (Motion Artifact Check): ${if (_isPatientMoving.value) "Yes (expect motion artifact distortion)" else "No (clean trace expected)"}
                     - Patient Activity & Clinical Symptoms: ${_patientSymptoms.value.ifEmpty { "None specified" }}
                     
+                    INSTRUCTIONS FOR INTERPRETATION & EXPLAINABILITY (FOR TEXT-ONLY READERS):
+                    1. For every clinical finding, clearly describe the corresponding visual pattern in the trace (e.g., "PR interval prolongation," "ST segment elevation in anterior leads") in simple terms so that a layperson can map the text to the visual chart.
+                    2. If this is a standard 12-lead ECG scan or contains multiple tracings, explicitly name the specific leads (e.g., V1-V3, II, III, aVF) showing the abnormalities so the user can cross-reference with clinical records.
+                    3. Explain clearly why muscle tremor or electrode motion (based on the Patient Moving flag) does or does not account for the abnormal readings.
+                    4. Ground your analysis with references to specific American Heart Association (AHA) / American College of Cardiology (ACC) guidelines or National Institutes of Health (NIH) consensus guidelines.
+                    
                     Ensure that you look for wave uniformity and identify potential arrhythmias or abnormal heart rate patterns.
                     Specifically look for:
                     - P-waves

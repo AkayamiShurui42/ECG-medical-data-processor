@@ -392,6 +392,44 @@ fun AnalyserWorkspace(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
+        // Medical Safety Warning Disclaimer
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)),
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Warning,
+                    contentDescription = "Medical Disclaimer",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp).padding(top = 2.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        text = "Clinical Research & Verification Tool",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "This application is for educational verification and literature mapping only. It should not be used to diagnose cardiac conditions or override professional diagnoses. Please consult a qualified cardiologist for official ECG readings and clinical care.",
+                        color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f),
+                        fontSize = 10.5.sp,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
+        }
+
         // Clinical Selection Bar
         Text(
             text = "Clinical Template Preloads",
