@@ -33,17 +33,17 @@ fun EcgVisualizerCanvas(
     val textMeasurer = rememberTextMeasurer()
 
     // Colors
-    val gridColorMinor = Color(0xFFFDE8E8) // Light medical red minor grid
-    val gridColorMajor = Color(0xFFF9C2C2) // Medical red major grid
-    val waveColor = Color(0xFF1E293B)      // Clean slate/charcoal wave
+    val gridColorMinor = Color(0x1FEE4444) // Light medical red minor grid
+    val gridColorMajor = Color(0x3FFF0000) // Medical red major grid
+    val waveColor = Color(0xFF00F5D4)      // Clean slate/charcoal wave
     val xaiColorGlow = Color(0x33FF007F)   // Neon pink glow for XAI
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(280.dp)
-            .background(Color(0xFFFFFDFD), shape = RoundedCornerShape(12.dp))
-            .border(1.dp, Color(0xFFE2E8F0), shape = RoundedCornerShape(12.dp))
+            .background(Color(0xFF090D16), shape = RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFF334155), shape = RoundedCornerShape(12.dp))
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
@@ -136,9 +136,9 @@ fun EcgVisualizerCanvas(
                     topLeft = Offset(startX + 4f, height - 22f),
                     style = TextStyle(
                         color = when (segment.type) {
-                            "P" -> Color(0xFF1D4ED8)
-                            "QRS" -> Color(0xFF047857)
-                            else -> Color(0xFF6D28D9)
+                            "P" -> Color(0xFF93C5FD)
+                            "QRS" -> Color(0xFF6EE7B7)
+                            else -> Color(0xFFC4B5FD)
                         },
                         fontSize = 9.sp
                     )
@@ -232,7 +232,7 @@ fun EcgVisualizerCanvas(
                         text = "RR: ${rrMs}ms",
                         topLeft = Offset((c1.x + c2.x) / 2f - 30f, bracketY - 20f),
                         style = TextStyle(
-                            color = Color(0xFF475569),
+                            color = Color(0xFFE2E8F0),
                             fontSize = 10.sp
                         )
                     )
@@ -273,7 +273,7 @@ fun EcgVisualizerCanvas(
                     text = artifact.label,
                     topLeft = labelOffset,
                     style = TextStyle(
-                        color = if (artifact.classification == "absolute") Color(0xFF991B1B) else if (artifact.classification == "potential") Color(0xFF92400E) else Color(0xFF065F46),
+                        color = if (artifact.classification == "absolute") Color(0xFFFCA5A5) else if (artifact.classification == "potential") Color(0xFFFDE047) else Color(0xFF86EFAC),
                         fontSize = 9.sp
                     )
                 )

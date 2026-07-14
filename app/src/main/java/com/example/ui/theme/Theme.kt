@@ -78,9 +78,8 @@ fun getCustomDarkColorScheme(primaryColor: Color): ColorScheme {
 
 @Composable
 fun MyApplicationTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  // Dynamic color is available on Android 12+
-  dynamicColor: Boolean = true,
+  darkTheme: Boolean = true,
+  dynamicColor: Boolean = false,
   customPrimaryHex: String? = null,
   content: @Composable () -> Unit,
 ) {

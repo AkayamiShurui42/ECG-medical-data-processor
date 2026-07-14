@@ -95,6 +95,9 @@ fun EcgDashboardScreen(
     val showXaiHeatmap by viewModel.showXaiHeatmap.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val apiErrorMessage by viewModel.apiErrorMessage.collectAsStateWithLifecycle()
+    val deviceType by viewModel.selectedDeviceType.collectAsStateWithLifecycle()
+    val isPatientMoving by viewModel.isPatientMoving.collectAsStateWithLifecycle()
+    val patientSymptoms by viewModel.patientSymptoms.collectAsStateWithLifecycle()
 
     // Staged File state for direct verification before analysis
     var stagedFileUri by remember { mutableStateOf<Uri?>(null) }
@@ -113,13 +116,16 @@ fun EcgDashboardScreen(
     var showSettings by remember { mutableStateOf(false) }
     val useDynamicColorSetting by viewModel.useDynamicColor.collectAsStateWithLifecycle()
     val customPrimaryColorHexSetting by viewModel.customPrimaryColorHex.collectAsStateWithLifecycle()
+    val geminiApiKeySetting by viewModel.geminiApiKey.collectAsStateWithLifecycle()
 
     if (showSettings) {
         ThemeSettingsDialog(
             useDynamicColor = useDynamicColorSetting,
             customPrimaryHex = customPrimaryColorHexSetting,
+            geminiApiKey = geminiApiKeySetting,
             onUseDynamicColorChange = { viewModel.setUseDynamicColor(it) },
             onCustomPrimaryHexChange = { viewModel.setCustomPrimaryColorHex(it) },
+            onGeminiApiKeyChange = { viewModel.setGeminiApiKey(it) },
             onDismissRequest = { showSettings = false }
         )
     }
@@ -137,7 +143,7 @@ fun EcgDashboardScreen(
             onTabSelected = { activeTab = it }
         )
 
-        HorizontalDivider(color = Color(0xFFE2E8F0))
+        HorizontalDivider(color = Color(0xFF334155))
 
         // Main Content Switcher with sliding/fading window transitions!
         AnimatedContent(
@@ -174,6 +180,12 @@ fun EcgDashboardScreen(
                         onToggleXai = { viewModel.toggleXaiHeatmap() },
                         stagedFileUri = stagedFileUri,
                         stagedFileMetadata = stagedFileMetadata,
+                        deviceType = deviceType,
+                        isPatientMoving = isPatientMoving,
+                        patientSymptoms = patientSymptoms,
+                        onDeviceTypeChange = { viewModel.setDeviceType(it) },
+                        onPatientMovingChange = { viewModel.setIsPatientMoving(it) },
+                        onPatientSymptomsChange = { viewModel.setPatientSymptoms(it) },
                         onPickFile = {
                             filePickerLauncher.launch(arrayOf("image/*", "application/pdf"))
                         },
@@ -209,8 +221,10 @@ fun EcgDashboardScreen(
                 }
                 3 -> {
                     // TAB 3: AHA & NIH Scientific Literature Repository
+                    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
                     LiteratureRepositoryView(
                         searchQuery = searchQuery,
+                        searchResults = searchResults,
                         onSearchChange = { viewModel.updateSearchQuery(it) }
                     )
                 }
@@ -303,7 +317,7 @@ fun TabSelector(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -360,6 +374,12 @@ fun AnalyserWorkspace(
     onToggleXai: () -> Unit,
     stagedFileUri: Uri?,
     stagedFileMetadata: FileMetadata?,
+    deviceType: String,
+    isPatientMoving: Boolean,
+    patientSymptoms: String,
+    onDeviceTypeChange: (String) -> Unit,
+    onPatientMovingChange: (Boolean) -> Unit,
+    onPatientSymptomsChange: (String) -> Unit,
     onPickFile: () -> Unit,
     onClearStagedFile: () -> Unit,
     onAnalyzeStagedFile: () -> Unit
@@ -467,12 +487,12 @@ fun AnalyserWorkspace(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFFE2E8F0))
+                    .background(Color(0xFF334155))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "RR Mapped",
-                    color = Color(0xFF475569),
+                    color = Color(0xFF94A3B8),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -531,7 +551,7 @@ fun AnalyserWorkspace(
                         color = Color(0xFF0F766E).copy(alpha = 0.5f),
                         shape = RoundedCornerShape(12.dp)
                     ),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
@@ -543,7 +563,7 @@ fun AnalyserWorkspace(
                     Icon(
                         imageVector = Icons.Filled.UploadFile,
                         contentDescription = "Upload Document",
-                        tint = Color(0xFF0F766E),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(48.dp)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -551,13 +571,13 @@ fun AnalyserWorkspace(
                         text = "Select ECG Image or PDF",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F172A)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Supports ECG scans, camera images (image/*) or medical reports (application/pdf)",
                         fontSize = 11.sp,
-                        color = Color(0xFF64748B),
+                        color = Color(0xFFCBD5E1),
                         textAlign = TextAlign.Center,
                         lineHeight = 15.sp
                     )
@@ -567,13 +587,13 @@ fun AnalyserWorkspace(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFFE2E8F0))
+                            .background(Color(0xFF334155))
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.VerifiedUser,
                             contentDescription = "Security",
-                            tint = Color(0xFF0F766E),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -581,7 +601,7 @@ fun AnalyserWorkspace(
                             text = "HIPAA COMPLIANT • SECURE CHANNEL",
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF475569)
+                            color = Color(0xFF94A3B8)
                         )
                     }
                 }
@@ -592,8 +612,8 @@ fun AnalyserWorkspace(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                    .border(1.dp, Color(0xFF334155), RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
@@ -617,7 +637,7 @@ fun AnalyserWorkspace(
                                 .size(84.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(Color(0xFFF1F5F9))
-                                .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(8.dp)),
+                                .border(1.dp, Color(0xFF475569), RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             val isPdf = stagedFileMetadata?.type?.contains("pdf", ignoreCase = true) == true
@@ -634,7 +654,7 @@ fun AnalyserWorkspace(
                                         text = "PDF DOC",
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF475569)
+                                        color = Color(0xFF94A3B8)
                                     )
                                 }
                             } else {
@@ -655,7 +675,7 @@ fun AnalyserWorkspace(
                                 text = stagedFileMetadata?.name ?: "ECG_Scan.pdf",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
@@ -663,14 +683,14 @@ fun AnalyserWorkspace(
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Box(
                                     modifier = Modifier
-                                        .background(Color(0xFFE2E8F0), RoundedCornerShape(4.dp))
+                                        .background(Color(0xFF334155), RoundedCornerShape(4.dp))
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
                                         text = formatFileSize(stagedFileMetadata?.size ?: 0L),
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF475569)
+                                        color = Color(0xFF94A3B8)
                                     )
                                 }
                                 Box(
@@ -698,6 +718,100 @@ fun AnalyserWorkspace(
                             )
                         }
                     }
+                    HorizontalDivider(color = Color(0xFF334155), modifier = Modifier.padding(vertical = 12.dp))
+
+                    Text(
+                        text = "Clinical Context & Device Selection",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // 1. Device Selection Chips
+                    Text(
+                        text = "Select ECG Device Source",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val devices = listOf("Standard 12-Lead ECG", "Apple Watch", "KardiaMobile", "ICU Bedside Monitor", "Patch/Holter")
+                        devices.forEach { dev ->
+                            val isSelected = dev == deviceType
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFF334155))
+                                    .clickable { onDeviceTypeChange(dev) }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = dev,
+                                    color = if (isSelected) Color.White else Color(0xFFCBD5E1),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+
+                    // 2. Symptoms input
+                    Text(
+                        text = "Patient Symptoms / Clinical Context",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    OutlinedTextField(
+                        value = patientSymptoms,
+                        onValueChange = onPatientSymptomsChange,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                        placeholder = { Text("e.g. resting, chest pain, palpitations, dyspnea") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+
+                    // 3. Motion check Switch
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF334155))
+                            .clickable { onPatientMovingChange(!isPatientMoving) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = "Is Patient Moving?",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Flags potential muscle tremor & motion artifacts",
+                                fontSize = 9.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
+                        Switch(
+                            checked = isPatientMoving,
+                            onCheckedChange = onPatientMovingChange
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -710,16 +824,16 @@ fun AnalyserWorkspace(
                             onClick = onClearStagedFile,
                             modifier = Modifier.weight(1.5f),
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color(0xFFCBD5E1))
+                            border = BorderStroke(1.dp, Color(0xFF475569))
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Cancel",
-                                tint = Color(0xFF475569),
+                                tint = Color(0xFF94A3B8),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Discard", color = Color(0xFF475569))
+                            Text("Discard", color = Color(0xFF94A3B8))
                         }
 
                         Button(
@@ -748,8 +862,8 @@ fun AnalyserWorkspace(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp)),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+                .border(1.dp, Color(0xFF334155), RoundedCornerShape(12.dp)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
@@ -764,7 +878,7 @@ fun AnalyserWorkspace(
                         Icon(
                             imageVector = Icons.Filled.AutoStories,
                             contentDescription = "Clinical Reference Book",
-                            tint = Color(0xFF0F766E),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -772,7 +886,7 @@ fun AnalyserWorkspace(
                             text = "Arrhythmia Visual Reference Guide",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F172A)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Icon(
@@ -787,7 +901,7 @@ fun AnalyserWorkspace(
                         Text(
                             text = "According to the newest 2026 American Heart Association (AHA) and National Institutes of Health (NIH) scientific consensus updates, visually distinguishing arrhythmias requires strict analysis of waveform morphologies and interval metrics:",
                             fontSize = 11.sp,
-                            color = Color(0xFF475569),
+                            color = Color(0xFF94A3B8),
                             lineHeight = 15.sp,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
@@ -828,11 +942,11 @@ fun AnalyserWorkspace(
         // Loading Screen Shimmer
         if (isAnalyzing) {
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                    .border(1.dp, Color(0xFF334155), RoundedCornerShape(12.dp))
                     .padding(bottom = 16.dp)
             ) {
                 Column(
@@ -856,7 +970,7 @@ fun AnalyserWorkspace(
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "Executing Homography image alignment, running noise filters, segmenting P-QRS-T complexes, and calibrating against AHA/NIH cardiological databases...",
-                        color = Color(0xFF64748B),
+                        color = Color(0xFFCBD5E1),
                         fontSize = 11.sp,
                         textAlign = TextAlign.Center,
                         lineHeight = 15.sp
@@ -875,11 +989,11 @@ fun AnalyserWorkspace(
 @Composable
 fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFF334155), RoundedCornerShape(12.dp))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -894,14 +1008,14 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                     Text(
                         text = "Diagnostic Classification",
                         fontSize = 10.sp,
-                        color = Color(0xFF64748B),
+                        color = Color(0xFFCBD5E1),
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = interpret.rhythmType,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0F172A)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -960,7 +1074,7 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                 text = "Identified Pathologies & Patterns",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569)
+                color = Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Row(
@@ -1000,7 +1114,7 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                 text = "Clinical Findings",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569)
+                color = Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -1018,7 +1132,7 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                 text = "Wave Segmentation & Signal Artifacts",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569)
+                color = Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.height(6.dp))
             interpret.artifacts.forEach { artifact ->
@@ -1032,7 +1146,7 @@ fun DetailedClinicalReport(interpret: com.example.data.InterpretResponse) {
                 text = "Clinical References (AHA & NIH)",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569)
+                color = Color(0xFF94A3B8)
             )
             Spacer(modifier = Modifier.height(6.dp))
             interpret.literatureRefs.forEach { lit ->
@@ -1052,7 +1166,7 @@ fun MetricWidget(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
             .padding(10.dp)
             .width(62.dp)
     ) {
@@ -1067,12 +1181,12 @@ fun MetricWidget(
             text = value,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF0F172A)
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = label,
             fontSize = 8.sp,
-            color = Color(0xFF64748B),
+            color = Color(0xFFCBD5E1),
             textAlign = TextAlign.Center
         )
     }
@@ -1103,7 +1217,7 @@ fun ArtifactItemRow(artifact: ArtifactPoint) {
                 text = "${artifact.label} (Index: ${artifact.index})",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Box(
                 modifier = Modifier
@@ -1123,7 +1237,7 @@ fun ArtifactItemRow(artifact: ArtifactPoint) {
         Text(
             text = artifact.explanation,
             fontSize = 10.sp,
-            color = Color(0xFF475569),
+            color = Color(0xFF94A3B8),
             lineHeight = 13.sp
         )
     }
@@ -1135,14 +1249,14 @@ fun LiteratureCitationRow(lit: ClinicalLiterature) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(6.dp))
             .padding(8.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = Icons.Filled.MenuBook,
             contentDescription = "Literature Citation",
-            tint = Color(0xFF0F766E),
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .size(16.dp)
                 .padding(top = 2.dp)
@@ -1153,12 +1267,12 @@ fun LiteratureCitationRow(lit: ClinicalLiterature) {
                 text = lit.title,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F172A)
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "Evidence: ${lit.levelOfEvidence} | Year: ${lit.year}",
                 fontSize = 9.sp,
-                color = Color(0xFF64748B),
+                color = Color(0xFFCBD5E1),
                 fontWeight = FontWeight.Medium
             )
         }
@@ -1187,7 +1301,7 @@ fun SavedReportsHistory(
                 text = "Local Tracing Logs",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF0F172A)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             if (reports.isNotEmpty()) {
@@ -1223,7 +1337,7 @@ fun SavedReportsHistory(
                     text = "No saved ECG reports",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFFCBD5E1)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -1270,10 +1384,10 @@ fun SavedReportCard(
             .clickable { onClick() }
             .border(
                 width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) Color(0xFF0F766E) else Color(0xFFE2E8F0),
+                color = if (isSelected) Color(0xFF0F766E) else Color(0xFF334155),
                 shape = RoundedCornerShape(10.dp)
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(10.dp)
     ) {
         Row(
@@ -1285,13 +1399,13 @@ fun SavedReportCard(
                     text = report.rhythmType,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0F172A)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = dateString,
                     fontSize = 11.sp,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFFCBD5E1)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1323,7 +1437,7 @@ fun BadgeMetric(text: String) {
             text = text,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF475569)
+            color = Color(0xFF94A3B8)
         )
     }
 }
@@ -1331,19 +1445,10 @@ fun BadgeMetric(text: String) {
 @Composable
 fun LiteratureRepositoryView(
     searchQuery: String,
+    searchResults: List<ClinicalLiterature>,
     onSearchChange: (String) -> Unit
 ) {
-    val filteredLit = remember(searchQuery) {
-        if (searchQuery.isEmpty()) {
-            LiteratureRepository.literatureList
-        } else {
-            LiteratureRepository.literatureList.filter {
-                it.title.contains(searchQuery, ignoreCase = true) ||
-                        it.summary.contains(searchQuery, ignoreCase = true) ||
-                        it.category.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
+    val filteredLit = searchResults
 
     Column(
         modifier = Modifier
@@ -1354,12 +1459,12 @@ fun LiteratureRepositoryView(
             text = "Arrhythmia & Signal Calibration Guidelines",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF0F172A)
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = "Authoritative AHA/ACC and NIH literature from newest to oldest for artifact identification.",
             fontSize = 11.sp,
-            color = Color(0xFF64748B),
+            color = Color(0xFFCBD5E1),
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
@@ -1403,7 +1508,7 @@ fun LiteratureRepositoryView(
                     text = "No matching cardiology guidelines found",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF64748B)
+                    color = Color(0xFFCBD5E1)
                 )
             }
         } else {
@@ -1413,11 +1518,11 @@ fun LiteratureRepositoryView(
             ) {
                 items(filteredLit) { paper ->
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(10.dp))
+                            .border(1.dp, Color(0xFF334155), RoundedCornerShape(10.dp))
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Row(
@@ -1453,7 +1558,7 @@ fun LiteratureRepositoryView(
                                 text = paper.title,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F172A)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Spacer(modifier = Modifier.height(2.dp))
@@ -1461,7 +1566,7 @@ fun LiteratureRepositoryView(
                             Text(
                                 text = "By ${paper.authors} — ${paper.source} (${paper.year})",
                                 fontSize = 11.sp,
-                                color = Color(0xFF64748B),
+                                color = Color(0xFFCBD5E1),
                                 fontWeight = FontWeight.Medium
                             )
 
@@ -1547,8 +1652,8 @@ fun ReferenceItem(title: String, description: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(8.dp))
-            .border(0.5.dp, Color(0xFFE2E8F0), shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
+            .border(0.5.dp, Color(0xFF334155), shape = RoundedCornerShape(8.dp))
             .padding(10.dp)
     ) {
         Text(
@@ -1572,8 +1677,10 @@ fun ReferenceItem(title: String, description: String) {
 fun ThemeSettingsDialog(
     useDynamicColor: Boolean,
     customPrimaryHex: String,
+    geminiApiKey: String,
     onUseDynamicColorChange: (Boolean) -> Unit,
     onCustomPrimaryHexChange: (String) -> Unit,
+    onGeminiApiKeyChange: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     AlertDialog(
@@ -1728,6 +1835,34 @@ fun ThemeSettingsDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+
+                // 3. Gemini API Key Configuration
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Gemini API Key",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    OutlinedTextField(
+                        value = geminiApiKey,
+                        onValueChange = onGeminiApiKeyChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Enter your Gemini API key") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    Text(
+                        text = "Your API key is stored securely on your device. It enables real-time clinical AI ECG interpretation via Gemini.",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
                 }
             }
         },

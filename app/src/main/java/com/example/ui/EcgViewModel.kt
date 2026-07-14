@@ -87,6 +87,50 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
     private val _activeInterpretation = MutableStateFlow<InterpretResponse?>(null)
     val activeInterpretation: StateFlow<InterpretResponse?> = _activeInterpretation.asStateFlow()
 
+    private val sharedPrefs = application.getSharedPreferences("ecg_settings", Context.MODE_PRIVATE)
+
+    private val _geminiApiKey = MutableStateFlow(sharedPrefs.getString("gemini_api_key", "") ?: "")
+    val geminiApiKey: StateFlow<String> = _geminiApiKey.asStateFlow()
+
+    fun setGeminiApiKey(key: String) {
+        _geminiApiKey.value = key
+        sharedPrefs.edit().putString("gemini_api_key", key).apply()
+    }
+
+    fun getApiKey(): String {
+        val userKey = _geminiApiKey.value
+        if (userKey.isNotEmpty()) return userKey
+        return BuildConfig.GEMINI_API_KEY
+    }
+
+    fun isApiKeyConfigured(): Boolean {
+        val userKey = _geminiApiKey.value
+        if (userKey.isNotEmpty()) return true
+        val buildKey = BuildConfig.GEMINI_API_KEY
+        return buildKey.isNotEmpty() && buildKey != "MY_GEMINI_API_KEY" && !buildKey.startsWith("placeholder")
+    }
+
+    private val _selectedDeviceType = MutableStateFlow("Standard 12-Lead ECG")
+    val selectedDeviceType: StateFlow<String> = _selectedDeviceType.asStateFlow()
+
+    private val _isPatientMoving = MutableStateFlow(false)
+    val isPatientMoving: StateFlow<Boolean> = _isPatientMoving.asStateFlow()
+
+    private val _patientSymptoms = MutableStateFlow("")
+    val patientSymptoms: StateFlow<String> = _patientSymptoms.asStateFlow()
+
+    fun setDeviceType(device: String) {
+        _selectedDeviceType.value = device
+    }
+
+    fun setIsPatientMoving(moving: Boolean) {
+        _isPatientMoving.value = moving
+    }
+
+    fun setPatientSymptoms(symptoms: String) {
+        _patientSymptoms.value = symptoms
+    }
+
     private val _isAnalyzing = MutableStateFlow(false)
     val isAnalyzing: StateFlow<Boolean> = _isAnalyzing.asStateFlow()
 
@@ -98,6 +142,9 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<List<ClinicalLiterature>>(LiteratureRepository.literatureList)
+    val searchResults: StateFlow<List<ClinicalLiterature>> = _searchResults.asStateFlow()
 
     private val _apiErrorMessage = MutableStateFlow<String?>(null)
     val apiErrorMessage: StateFlow<String?> = _apiErrorMessage.asStateFlow()
@@ -138,6 +185,24 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
+        viewModelScope.launch {
+            if (query.isEmpty()) {
+                _searchResults.value = LiteratureRepository.literatureList
+            } else {
+                val results = withContext(Dispatchers.IO) {
+                    PubMedSearch.searchPubMed(query)
+                }
+                if (results.isNotEmpty()) {
+                    _searchResults.value = results
+                } else {
+                    _searchResults.value = LiteratureRepository.literatureList.filter {
+                        it.title.contains(query, ignoreCase = true) ||
+                                it.summary.contains(query, ignoreCase = true) ||
+                                it.category.contains(query, ignoreCase = true)
+                    }
+                }
+            }
+        }
     }
 
     fun selectHistoricReport(report: EcgReportEntity) {
@@ -183,16 +248,11 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun isApiKeyConfigured(): Boolean {
-        val key = BuildConfig.GEMINI_API_KEY
-        return key.isNotEmpty() && key != "MY_GEMINI_API_KEY" && !key.startsWith("placeholder")
-    }
-
     fun analyzeEcgImage(uri: Uri, context: Context) {
         viewModelScope.launch {
             _isAnalyzing.value = true
             _apiErrorMessage.value = null
-
+ 
             try {
                 if (!isApiKeyConfigured()) {
                     // Fallback to beautiful simulation if no API key is specified
@@ -200,14 +260,20 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
                     _apiErrorMessage.value = "Gemini API key is not configured. Displaying simulated cardiac analysis based on AHA guidelines."
                     return@launch
                 }
-
+ 
                 val base64Image = withContext(Dispatchers.IO) {
                     val bitmap = loadBitmapFromUri(context, uri, 1024) ?: throw Exception("Failed to read image or PDF.")
                     bitmap.toBase64()
                 }
-
+ 
                 val prompt = """
                     You are an expert cardiologist AI. Analyze this heart monitor tracing or ECG image.
+                    
+                    CLINICAL METADATA PROVIDED BY THE USER:
+                    - ECG Device Source: ${_selectedDeviceType.value}
+                    - Is Patient Moving (Motion Artifact Check): ${if (_isPatientMoving.value) "Yes (expect motion artifact distortion)" else "No (clean trace expected)"}
+                    - Patient Activity & Clinical Symptoms: ${_patientSymptoms.value.ifEmpty { "None specified" }}
+                    
                     Ensure that you look for wave uniformity and identify potential arrhythmias or abnormal heart rate patterns.
                     Specifically look for:
                     - P-waves
@@ -245,7 +311,7 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     Only output the raw JSON. Do not include markdown code block syntax.
                 """.trimIndent()
-
+ 
                 val request = GeminiRequest(
                     contents = listOf(
                         GeminiContent(
@@ -260,9 +326,9 @@ class EcgViewModel(application: Application) : AndroidViewModel(application) {
                         temperature = 0.2f
                     )
                 )
-
+ 
                 val response = withContext(Dispatchers.IO) {
-                    GeminiNetwork.service.generateContent(BuildConfig.GEMINI_API_KEY, request)
+                    GeminiNetwork.service.generateContent(getApiKey(), request)
                 }
 
                 val jsonResponse = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text

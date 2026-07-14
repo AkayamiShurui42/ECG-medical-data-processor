@@ -160,7 +160,7 @@ fun BaselinesWorkspace(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF8FAFC)),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -168,7 +168,7 @@ fun BaselinesWorkspace(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Row(
@@ -184,7 +184,7 @@ fun BaselinesWorkspace(
                         Icon(
                             imageVector = Icons.Filled.HealthAndSafety,
                             contentDescription = "Alert Icon",
-                            tint = Color(0xFF0F766E),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -194,12 +194,12 @@ fun BaselinesWorkspace(
                             text = "My Personal Cardiac Baselines",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF0F172A)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Establish your healthy baseline parameters, select your device, and input echocardiogram dimensions to compare live scans against clinical guidelines.",
                             fontSize = 11.sp,
-                            color = Color(0xFF64748B),
+                            color = Color(0xFFCBD5E1),
                             lineHeight = 15.sp
                         )
                     }
@@ -211,7 +211,7 @@ fun BaselinesWorkspace(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -224,7 +224,7 @@ fun BaselinesWorkspace(
                             text = "Superimposed Waveform Comparison",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -234,7 +234,7 @@ fun BaselinesWorkspace(
                                     .background(Color(0xFF0F766E), RoundedCornerShape(2.dp))
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Active Reading", fontSize = 10.sp, color = Color(0xFF475569))
+                            Text("Active Reading", fontSize = 10.sp, color = Color(0xFF94A3B8))
                             Spacer(modifier = Modifier.width(10.dp))
                             Box(
                                 modifier = Modifier
@@ -242,7 +242,7 @@ fun BaselinesWorkspace(
                                     .background(Color(0xFF94A3B8), RoundedCornerShape(2.dp))
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Baseline", fontSize = 10.sp, color = Color(0xFF475569))
+                            Text("Baseline", fontSize = 10.sp, color = Color(0xFF94A3B8))
                         }
                     }
 
@@ -275,7 +275,7 @@ fun BaselinesWorkspace(
                 // Baseline Creation Form
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -288,7 +288,7 @@ fun BaselinesWorkspace(
                                 text = "Setup Custom Baseline Template",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             // Load active reading metrics button
@@ -616,7 +616,7 @@ fun BaselinesWorkspace(
                 // Personal Baselines List Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -624,7 +624,7 @@ fun BaselinesWorkspace(
                             text = "Saved Personal Baselines",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         if (baselines.isEmpty()) {
@@ -651,7 +651,7 @@ fun BaselinesWorkspace(
                                         .padding(vertical = 4.dp)
                                         .border(
                                             width = if (isSelected) 1.5.dp else 0.5.dp,
-                                            color = if (isSelected) Color(0xFF0F766E) else Color(0xFFE2E8F0),
+                                            color = if (isSelected) Color(0xFF0F766E) else Color(0xFF334155),
                                             shape = RoundedCornerShape(8.dp)
                                         )
                                         .background(
@@ -676,12 +676,12 @@ fun BaselinesWorkspace(
                                         Text(
                                             text = "Device: ${baseline.deviceType} • EF: ${baseline.ejectionFraction.toInt()}% • LV IDD: ${baseline.lvIdd}mm",
                                             fontSize = 10.sp,
-                                            color = Color(0xFF64748B)
+                                            color = Color(0xFFCBD5E1)
                                         )
                                         Text(
                                             text = "PR: ${baseline.prInterval}ms • QRS: ${baseline.qrsDuration}ms • QT: ${baseline.qtInterval}ms",
                                             fontSize = 10.sp,
-                                            color = Color(0xFF475569)
+                                            color = Color(0xFF94A3B8)
                                         )
                                     }
 
@@ -707,7 +707,7 @@ fun BaselinesWorkspace(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -715,7 +715,7 @@ fun BaselinesWorkspace(
                         text = "Side-by-Side Comparative Analysis",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B),
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
@@ -727,10 +727,10 @@ fun BaselinesWorkspace(
                             .padding(vertical = 8.dp, horizontal = 6.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Parameter", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF475569), modifier = Modifier.weight(2f))
+                        Text("Parameter", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), modifier = Modifier.weight(2f))
                         Text("Active ECG", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F766E), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
-                        Text("Baseline", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
-                        Text("Deviation", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF475569), modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
+                        Text("Baseline", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFCBD5E1), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
+                        Text("Deviation", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8), modifier = Modifier.weight(1.5f), textAlign = TextAlign.End)
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -760,7 +760,7 @@ fun BaselinesWorkspace(
                         ) {
                             Text(param, fontSize = 11.sp, color = Color(0xFF334155), modifier = Modifier.weight(2f))
                             Text(activeVal, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFF0F766E), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
-                            Text(baseVal, fontSize = 11.sp, color = Color(0xFF64748B), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
+                            Text(baseVal, fontSize = 11.sp, color = Color(0xFFCBD5E1), modifier = Modifier.weight(1.5f), textAlign = TextAlign.Center)
 
                             // Deviation calculation
                             val deviationText = when (param) {
@@ -883,7 +883,7 @@ fun BaselinesWorkspace(
                         Text(
                             text = alert.description,
                             fontSize = 12.sp,
-                            color = Color(0xFF475569),
+                            color = Color(0xFF94A3B8),
                             lineHeight = 16.sp
                         )
 
@@ -904,7 +904,7 @@ fun BaselinesWorkspace(
                                 text = "Supporting Medical Literature (Newest to Oldest):",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             alert.literatureCitations.forEach { lit ->
@@ -912,8 +912,8 @@ fun BaselinesWorkspace(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 6.dp)
-                                        .background(Color.White, RoundedCornerShape(6.dp))
-                                        .border(0.5.dp, Color(0xFFE2E8F0), RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
+                                        .border(0.5.dp, Color(0xFF334155), RoundedCornerShape(6.dp))
                                         .padding(10.dp)
                                 ) {
                                     Row(
@@ -931,21 +931,21 @@ fun BaselinesWorkspace(
                                         Box(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(4.dp))
-                                                .background(Color(0xFFE2E8F0))
+                                                .background(Color(0xFF334155))
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             Text(
                                                 text = lit.year.toString(),
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF475569)
+                                                color = Color(0xFF94A3B8)
                                             )
                                         }
                                     }
                                     Text(
                                         text = "Authors: ${lit.authors} • Source: ${lit.source}",
                                         fontSize = 9.sp,
-                                        color = Color(0xFF64748B),
+                                        color = Color(0xFFCBD5E1),
                                         modifier = Modifier.padding(top = 2.dp)
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
@@ -995,7 +995,7 @@ fun BaselinesWorkspace(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -1003,12 +1003,12 @@ fun BaselinesWorkspace(
                         text = "Clinical Reference Rhythm Baselines",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Browse typical intervals and waveforms for major cardiac pathologies to compare against your logs.",
                         fontSize = 11.sp,
-                        color = Color(0xFF64748B),
+                        color = Color(0xFFCBD5E1),
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
@@ -1018,7 +1018,7 @@ fun BaselinesWorkspace(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
-                                .border(0.5.dp, Color(0xFFE2E8F0), RoundedCornerShape(8.dp))
+                                .border(0.5.dp, Color(0xFF334155), RoundedCornerShape(8.dp))
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1067,7 +1067,7 @@ fun BaselinesWorkspace(
                                         text = rhythm.name,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = Color(0xFF1E293B)
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                                 Icon(
@@ -1085,13 +1085,13 @@ fun BaselinesWorkspace(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color(0xFFF8FAFC))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                         .padding(12.dp)
                                 ) {
                                     Text(
                                         text = rhythm.description,
                                         fontSize = 11.sp,
-                                        color = Color(0xFF475569),
+                                        color = Color(0xFF94A3B8),
                                         lineHeight = 15.sp
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -1116,39 +1116,39 @@ fun BaselinesWorkspace(
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .background(Color.White, RoundedCornerShape(6.dp))
-                                                .border(0.5.dp, Color(0xFFE2E8F0), RoundedCornerShape(6.dp))
+                                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
+                                                .border(0.5.dp, Color(0xFF334155), RoundedCornerShape(6.dp))
                                                 .padding(6.dp)
                                         ) {
                                             Column {
                                                 Text("HR: ${rhythm.typicalHr} bpm", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F766E))
-                                                Text("PR: ${if (rhythm.prIntervalMs > 0) "${rhythm.prIntervalMs}ms" else "N/A"}", fontSize = 9.sp, color = Color(0xFF475569))
+                                                Text("PR: ${if (rhythm.prIntervalMs > 0) "${rhythm.prIntervalMs}ms" else "N/A"}", fontSize = 9.sp, color = Color(0xFF94A3B8))
                                             }
                                         }
 
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .background(Color.White, RoundedCornerShape(6.dp))
-                                                .border(0.5.dp, Color(0xFFE2E8F0), RoundedCornerShape(6.dp))
+                                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
+                                                .border(0.5.dp, Color(0xFF334155), RoundedCornerShape(6.dp))
                                                 .padding(6.dp)
                                         ) {
                                             Column {
                                                 Text("QRS: ${rhythm.qrsDurationMs} ms", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F766E))
-                                                Text("QT: ${if (rhythm.qtMs > 0) "${rhythm.qtMs}ms" else "N/A"}", fontSize = 9.sp, color = Color(0xFF475569))
+                                                Text("QT: ${if (rhythm.qtMs > 0) "${rhythm.qtMs}ms" else "N/A"}", fontSize = 9.sp, color = Color(0xFF94A3B8))
                                             }
                                         }
 
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .background(Color.White, RoundedCornerShape(6.dp))
-                                                .border(0.5.dp, Color(0xFFE2E8F0), RoundedCornerShape(6.dp))
+                                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
+                                                .border(0.5.dp, Color(0xFF334155), RoundedCornerShape(6.dp))
                                                 .padding(6.dp)
                                         ) {
                                             Column {
                                                 Text("ST: ${rhythm.stElevationMv} mV", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F766E))
-                                                Text("T Morph: ${rhythm.tWaveMorphology}", fontSize = 9.sp, color = Color(0xFF475569))
+                                                Text("T Morph: ${rhythm.tWaveMorphology}", fontSize = 9.sp, color = Color(0xFF94A3B8))
                                             }
                                         }
                                     }
@@ -1188,7 +1188,7 @@ fun DualEcgVisualizerCanvas(
         modifier = modifier
             .fillMaxWidth()
             .background(Color(0xFFFFFDFD), shape = RoundedCornerShape(12.dp))
-            .border(1.dp, Color(0xFFE2E8F0), shape = RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFF334155), shape = RoundedCornerShape(12.dp))
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
