@@ -16,15 +16,21 @@
         android:theme="@style/Theme.MyApplication">
 
         <activity
-            android:name=".EcgVisualWorkbenchActivity"
+            android:name=".EcgGridWorkbenchActivity"
             android:exported="true"
-            android:label="ECG / IEGM Signal Workbench"
+            android:label="ECG / IEGM Grid Workbench"
             android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".EcgVisualWorkbenchActivity"
+            android:exported="false"
+            android:label="ECG / IEGM Signal Workbench"
+            android:theme="@style/Theme.MyApplication" />
 
         <activity
             android:name=".EcgAutoWorkbenchActivity"
