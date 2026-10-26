@@ -63,8 +63,15 @@ object PatientDocumentReader {
             mime.contains("wordprocessingml") || extension == "docx" -> {
                 wordText(bytes) to "DOCX paragraph text; tables and embedded pictures may need separate review."
             }
-            extension in setOf("txt","csv","json","xml","md","tsv") ||
-              mime.startsWith("text/") || mime == "application/json" || mime == "application/xml" -> {
+            extension == "json" || mime == "application/json" -> {
+                StructuredMedicalText.jsonToClinicalLines(bytes.toString(Charsets.UTF_8)) to
+                    "Structured JSON flattened to searchable clinical lines; validate coding and provenance."
+            }
+            extension == "xml" || mime == "application/xml" -> {
+                StructuredMedicalText.xmlToClinicalLines(bytes.toString(Charsets.UTF_8)) to
+                    "XML content and attributes extracted; validate terminology and context."
+            }
+            extension in setOf("txt","csv","md","tsv") || mime.startsWith("text/") -> {
                 bytes.toString(Charsets.UTF_8) to "Text imported; verify encoding and clinical context."
             }
             else -> throw IllegalArgumentException("Supported: PDF, DOCX, image, TXT, CSV, JSON, XML, TSV or Markdown.")
