@@ -157,6 +157,9 @@ private fun GridWorkbenchScreen() {
                 OutlinedButton(onClick = { context.startActivity(Intent(context, HeartFailurePhenotypeActivity::class.java)) }) {
                     Text("Open heart-failure / low-flow research")
                 }
+                OutlinedButton(onClick = { context.startActivity(Intent(context, PatientResearchActivity::class.java)) }) {
+                    Text("Open medical-record research & document upload")
+                }
             }
         }
 
