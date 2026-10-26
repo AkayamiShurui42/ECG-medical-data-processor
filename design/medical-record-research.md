@@ -38,3 +38,7 @@ Do not commit real patient records or application API keys to the GitHub reposit
 ## Local clinical evidence cross-check
 
 The app also performs a transparent, local cross-check for a few relationships and contradictory record statements. The differential questions are not new diagnoses and do not use a generative model. A preserved EF with SVI <35, syncope plus orthostatic findings, and hypoxemia plus sleep apnea are examples of research patterns, not conclusions. The source record names are displayed for traceability.
+
+## Launch behavior
+
+Medical Record Research is the default launcher activity in v1.3.1. Consent to topic searches persists in the app-local workspace; a new app launch triggers a fresh search for mapped findings, with result status visible. ECG tracing remains optional from a separate button.

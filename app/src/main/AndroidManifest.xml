@@ -18,14 +18,9 @@
 
         <activity
             android:name=".EcgGridWorkbenchActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="ECG / IEGM Grid Workbench"
-            android:theme="@style/Theme.MyApplication">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.MyApplication" />
 
         <activity
             android:name=".EcgVisualWorkbenchActivity"
@@ -53,9 +48,14 @@
 
         <activity
             android:name=".PatientResearchActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="Medical Record Research"
-            android:theme="@style/Theme.MyApplication" />
+            android:theme="@style/Theme.MyApplication">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".HeartFailurePhenotypeActivity"
