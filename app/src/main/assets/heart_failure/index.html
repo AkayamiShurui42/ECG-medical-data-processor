@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Cardiac Low-Flow Research</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui,Roboto,sans-serif;background:#0b1424;color:#eef4ff}
+*{box-sizing:border-box}body{max-width:1000px;margin:auto;padding:14px}h1{font-size:1.55rem}h2{font-size:1.18rem}p{line-height:1.5}
+a{color:#99ddff}.panel{background:#15243b;border:1px solid #344961;border-radius:12px;padding:15px;margin:12px 0}
+.note{font-size:.86rem;color:#baccdf}.warning{background:#3e3023;border-left:4px solid #ffc476;padding:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:5px;font-size:.88rem}
+input[type=number]{width:100%;padding:9px;background:#0b192c;border:1px solid #667a95;color:white;border-radius:6px}
+button{background:#067aa3;color:white;padding:11px;border:0;border-radius:7px;font-weight:700;margin:5px 5px 5px 0}
+button.alt{background:#445871}button:focus-visible,input:focus-visible{outline:2px solid white}
+.result{background:#0d1d34;border:1px solid #46627f;border-radius:8px;padding:11px;margin:9px 0}
+.result strong{color:#b8e8ff}footer{font-size:.82rem;color:#aabbcc;padding:12px 0 30px}
+</style></head><body>
+<header class="panel"><div class="note">ECG medical data processor / CardioSubType research module</div>
+<h1>Low-flow and preserved-EF phenotype explorer</h1>
+<p>Compare forward flow, cardiac geometry, strain and clinical context. This worksheet implements transparent calculations, not a trained or validated AI classifier.</p>
+<div class="warning"><strong>Not a diagnostic medical device.</strong> Numerical flags cannot independently diagnose heart failure, its stage, or the cause of symptoms. Clinical evaluation remains essential.</div>
+</header>
+<section class="panel"><h2>Measurements</h2>
+<p class="note">Unentered values remain unknown. GLS and RVFWLS use positive magnitudes. All sample values are synthetic.</p>
+<div class="grid">
+<label>Stroke volume index (mL/m²)<input id="svi" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>Heart rate (beats/min)<input id="hr" type="number" min="0" step="1" placeholder="Unknown"></label>
+<label>LV end-diastolic volume index (mL/m²)<input id="lvedvi" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>LV mass index (g/m²)<input id="lvmi" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>LVEF (%)<input id="lvef" type="number" min="0" max="100" step=".1" placeholder="Unknown"></label>
+<label>LV global longitudinal strain magnitude (%)<input id="gls" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>LA reservoir strain (%)<input id="lasr" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>RV free-wall strain magnitude (%)<input id="rvfwls" type="number" min="0" step=".1" placeholder="Unknown"></label>
+<label>NT-proBNP (pg/mL)<input id="ntprobnp" type="number" min="0" step="1" placeholder="Unknown"></label>
+<label>Resting E/e′<input id="ee" type="number" min="0" step=".1" placeholder="Unknown"></label>
+</div>
+<h2>Clinical evidence</h2>
+<p class="note">These checkboxes record what has been independently documented. They do not establish causation.</p>
+<p><label><span><input id="symptoms" type="checkbox"> Current or prior symptoms/signs potentially consistent with HF</span></label></p>
+<p><label><span><input id="cardiac" type="checkbox"> Clinician-documented structural/functional cardiac abnormality</span></label></p>
+<p><label><span><input id="congestion" type="checkbox"> Objective cardiogenic congestion / filling-pressure evidence</span></label></p>
+<button id="evaluate" type="button">Evaluate</button><button id="example" class="alt" type="button">Synthetic example</button><button id="clear" class="alt" type="button">Clear</button>
+</section>
+<section id="results" class="panel" hidden aria-live="polite"><h2>Research findings</h2><div id="output"></div>
+<p class="note">Research flags are not individual risk estimates, sensitivity/specificity results, trained model output or SHAP feature contributions.</p>
+</section>
+<section class="panel"><h2>Interpretation and references</h2>
+<p>When SVI and HR are provided, cardiac index is estimated as SVI × HR ÷ 1000. When SVI and LV mass index are provided, myocardial contraction fraction is estimated as SVI ÷ (LVMI ÷ 1.05 g/mL) × 100. These estimates depend on method, load and measurement quality.</p>
+<p>Preserved ejection fraction does not guarantee normal forward output; reduced stroke volume or small chambers alone do not prove heart failure. A normal natriuretic peptide should be interpreted with the other evidence, and alone does not exclude HFpEF.</p>
+<p class="note">2026 <a href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001455">Second Universal Definition of HF</a> · <a href="https://www.jacc.org/doi/10.1016/j.jacc.2026.06.018">ACC HFpEF Expert Consensus</a> · <a href="https://academic.oup.com/eurheartj/article/47/38/5346/8766302">ESC HF Guidelines</a></p>
+</section>
+<footer>All calculations are offline. No network requests, tracking, uploaded patient data or personal access tokens.</footer>
+<script>
+(function(){
+"use strict";
+var fields=["svi","hr","lvedvi","lvmi","lvef","gls","lasr","rvfwls","ntprobnp","ee"];
+function num(k){var raw=document.getElementById(k).value.trim();return raw===""?null:Number(raw);}
+function line(title,description){var container=document.createElement("div");container.className="result";var heading=document.createElement("strong");heading.textContent=title;var body=document.createElement("p");body.textContent=description;container.append(heading,body);document.getElementById("output").appendChild(container);}
+function evaluate(){
+document.getElementById("output").replaceChildren();
+document.getElementById("results").hidden=false;
+var invalid=fields.some(function(k){var value=num(k);return value!==null&&(!Number.isFinite(value)||value<0);});
+if(invalid){line("Invalid input","Measurements must be finite, nonnegative numeric values.");return;}
+var svi=num("svi"),hr=num("hr"),edv=num("lvedvi"),mass=num("lvmi"),ef=num("lvef");
+var gls=num("gls"),lasr=num("lasr"),rv=num("rvfwls"),bnp=num("ntprobnp"),ee=num("ee");
+if(ef!==null&&ef>100){line("Invalid LVEF","Ejection fraction must not exceed 100%.");return;}
+if(fields.every(function(k){return num(k)===null;})){line("Missing evidence","Enter documented measurements. Unknown is not zero or normal.");return;}
+if(svi!==null){line("Axis 1: Forward flow",svi<35?"SVI "+svi+" mL/m² is below an illustrative low-flow research boundary. It warrants contextual assessment, not an automatic HF diagnosis.":"SVI "+svi+" mL/m² does not trigger the illustrative low-flow boundary; this does not rule out disease.");}
+if(svi!==null&&hr!==null){line("Derived cardiac index",(svi*hr/1000).toFixed(2)+" L/min/m², calculated from SVI and heart rate rather than directly measured.");}
+if(svi!==null&&mass!==null&&mass>0){line("Axis 2: Myocardial contraction fraction",(svi/(mass/1.05)*100).toFixed(1)+"% (estimated using assumed myocardial density of 1.05 g/mL).");}
+if(edv!==null&&ef!==null&&svi!==null){var volumeDerived=edv*ef/100;var discordance=Math.abs(volumeDerived-svi)/Math.max(volumeDerived,svi,.000001)>0.25;line("Geometry consistency check","Volume-derived SVI ≈ "+volumeDerived.toFixed(1)+" mL/m² vs entered SVI "+svi.toFixed(1)+". "+(discordance?"Values differ by more than 25%; verify imaging acquisition, regurgitation and measurement methods.":"No >25% disagreement detected; this does not validate the numbers."));}
+if(ef!==null){line("Ejection fraction",ef>=50?"EF "+ef+"% is in a commonly described preserved range. Preserved EF alone does not quantify cardiac output.":"EF "+ef+"% is below 50%; interpret according to measurement method and clinical context.");}
+if(gls!==null||lasr!==null||rv!==null){var items=[];if(gls!==null)items.push("GLS magnitude "+gls+"%"+(gls<16?" (below illustrative 16% cutoff)":""));if(lasr!==null)items.push("LA reservoir "+lasr+"%"+(lasr<18?" (below illustrative 18% cutoff)":""));if(rv!==null)items.push("RV free-wall magnitude "+rv+"%");line("Axis 3: Deformation",items.join("; ")+". Method-specific reference ranges and acquisition quality are essential.");}
+if(bnp!==null||ee!==null){line("Axis 4: Biomarkers and filling pressure",(bnp!==null?"NT-proBNP "+bnp+" pg/mL. ":"")+(ee!==null?"Resting E/e′ "+ee+". ":"")+"Neither measurement alone rules in or excludes HFpEF.");}
+var symptoms=document.getElementById("symptoms").checked,cardiac=document.getElementById("cardiac").checked,congestion=document.getElementById("congestion").checked;
+line("Clinical evidence gate",symptoms&&cardiac?"Symptoms/signs and cardiac abnormalities were both marked as documented; the causal relationship and full diagnostic criteria still require a clinician.":"Symptoms/signs or cardiac abnormality are not both documented here. No Stage C diagnosis can be generated."+(congestion?" Objective congestion was selected; verify the cause.":" No objective congestion was selected."));
+line("Interpretation boundary","Possible explanations for low flow include underfilling, altered preload/venous return, arrhythmia, valvular disease, measurement differences and other cardiac or extracardiac conditions. Longitudinal and exercise/orthostatic evidence may help.");
+}
+document.getElementById("evaluate").addEventListener("click",evaluate);
+document.getElementById("example").addEventListener("click",function(){var demo={svi:28,hr:82,lvedvi:51,lvmi:72,lvef:55,gls:17,lasr:24,rvfwls:23,ntprobnp:90,ee:7};fields.forEach(function(k){document.getElementById(k).value=demo[k];});["symptoms","cardiac","congestion"].forEach(function(k){document.getElementById(k).checked=false;});evaluate();});
+document.getElementById("clear").addEventListener("click",function(){fields.forEach(function(k){document.getElementById(k).value="";});["symptoms","cardiac","congestion"].forEach(function(k){document.getElementById(k).checked=false;});document.getElementById("results").hidden=true;});
+})();
+</script>
+</body></html>

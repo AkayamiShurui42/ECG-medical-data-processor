@@ -1,6 +1,7 @@
 package com.example
 
 import android.content.ClipData
+import android.content.Intent
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
@@ -153,6 +154,9 @@ private fun GridWorkbenchScreen() {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("ECG / IEGM Grid Workbench", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text("Grid-first strip detection • physiologic beat gate • copyable interpretation • visual differential", fontSize = 11.5.sp)
+                OutlinedButton(onClick = { context.startActivity(Intent(context, HeartFailurePhenotypeActivity::class.java)) }) {
+                    Text("Open heart-failure / low-flow research")
+                }
             }
         }
 
