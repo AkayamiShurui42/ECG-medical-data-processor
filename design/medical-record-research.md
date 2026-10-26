@@ -34,3 +34,7 @@ Europe PMC REST documentation: https://dev.europepmc.org/RestfulWebService
 ## Security
 
 Do not commit real patient records or application API keys to the GitHub repository. The research workspace stores a local case in `noBackupFilesDir`; the app disables Android Auto Backup. No patient-specific names, record text or excerpts are intentionally included in literature queries, aside from explicitly typed user research topics.
+
+## Local clinical evidence cross-check
+
+The app also performs a transparent, local cross-check for a few relationships and contradictory record statements. The differential questions are not new diagnoses and do not use a generative model. A preserved EF with SVI <35, syncope plus orthostatic findings, and hypoxemia plus sleep apnea are examples of research patterns, not conclusions. The source record names are displayed for traceability.

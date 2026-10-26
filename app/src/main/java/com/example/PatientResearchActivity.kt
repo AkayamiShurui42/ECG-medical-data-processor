@@ -148,6 +148,10 @@ private fun PatientResearchScreen() {
         )
     }
 
+    val clinicalObservations=remember(state.findings,state.literature) {
+        ClinicalResearchSynthesis.evaluate(state.findings,state.literature)
+    }
+
     LazyColumn(
         modifier=Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentPadding=PaddingValues(16.dp),
@@ -163,7 +167,7 @@ private fun PatientResearchScreen() {
             Card {
                 Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
                     Text("1. Upload medical documents",fontWeight=FontWeight.Bold)
-                    Text("PDFs, scanned images, DOCX, TXT, CSV, JSON, XML and Markdown. Multiple imports supported. Source excerpts are stored privately on the device.",
+                    Text("PDFs, scanned images, DOCX, TXT, CSV, JSON, XML and Markdown. Multiple imports supported. Source excerpts are stored privately on the device. One workspace represents ONE person: clear it before importing another person’s records.",
                         style=MaterialTheme.typography.bodySmall)
                     Button(onClick={
                         picker.launch(arrayOf("application/pdf",
@@ -220,6 +224,23 @@ private fun PatientResearchScreen() {
                     }
                     Text("Research is refreshed per topic, with publication links, timestamps, visible errors, cached results and source evidence. No retrieved study silently changes clinical rules.",
                         style=MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+        item {
+            Card {
+                Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    Text("4. Clinical evidence cross-check",fontWeight=FontWeight.Bold)
+                    Text("These are records-based research questions and contradictions, not medical diagnoses. Interpret only with the original records and source publications.",
+                        style=MaterialTheme.typography.bodySmall)
+                    clinicalObservations.forEach { observation ->
+                        HorizontalDivider()
+                        Text(observation.title,fontWeight=FontWeight.SemiBold)
+                        Text(observation.description,style=MaterialTheme.typography.bodySmall)
+                        if(observation.evidenceSources.isNotEmpty())
+                            Text("Record sources: "+observation.evidenceSources.joinToString(),
+                                style=MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
         }
