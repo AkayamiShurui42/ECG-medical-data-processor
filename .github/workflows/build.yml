@@ -28,6 +28,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Validate cardiac phenotype rules
+        run: python3 -m unittest discover -s research/heart_failure/tests -v
+
       - name: Build with Gradle
         run: ./gradlew assembleDebug
 
