@@ -160,6 +160,9 @@ private fun PatientResearchScreen() {
         item {
             Text("Medical Record Research",style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
             Text("Upload clinical documents, extract findings, and search fresh medical literature for each mapped topic. No ECG tracing investigation.")
+            OutlinedButton(onClick={context.startActivity(Intent(context,EcgGridWorkbenchActivity::class.java))}) {
+                Text("Optional: Open ECG tracing workbench")
+            }
             Text("Research assistance only. Neither a record mention nor a matching paper proves a diagnosis. This is not a validated diagnostic or prescribing system.",
                 style=MaterialTheme.typography.bodySmall)
         }
